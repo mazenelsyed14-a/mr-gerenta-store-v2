@@ -62,9 +62,9 @@ app.use(
   })
 );
 
-// معالجة البيانات من نوع JSON و Form Data
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// معالجة البيانات من نوع JSON و Form Data مع دعم الصور المشفرة (Base64)
+app.use(express.json({ limit: "15mb" }));
+app.use(express.urlencoded({ extended: true, limit: "15mb" }));
 
 // خدمة ملفات الصور المرفوعة
 app.use("/upload", express.static(UPLOAD_DIR));
@@ -95,20 +95,8 @@ app.use(
   })
 );
 
-// إعداد تخزين الصور بواسطة Multer
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, UPLOAD_DIR);
-  },
-  filename: (req, file, cb) => {
-    // استخراج الامتداد الأصلي وتنظيف الاسم
-    const ext = path.extname(file.originalname).toLowerCase();
-    const cleanName = path
-      .basename(file.originalname, ext)
-      .replace(/[^a-zA-Z0-9_-]/g, "_");
-    cb(null, `${Date.now()}-${cleanName}${ext}`);
-  }
-});
+// إعداد تخزين الصور بواسطة Multer في الذاكرة (MemoryStorage) للتوافق مع Vercel والسحابة
+const storage = multer.memoryStorage();
 
 // فلتر لفحص نوع الملف (صور فقط)
 const fileFilter = (req, file, cb) => {
@@ -123,7 +111,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 } // حد أقصى 5 ميجابايت
+  limits: { fileSize: 10 * 1024 * 1024 } // حد أقصى 10 ميجابايت
 });
 
 // ======================= المسارات (API Routes) ======================= //
@@ -175,7 +163,7 @@ app.get("/products", (req, res) => {
 // 5) إضافة منتج جديد (خاص بالمالك)
 app.post("/add", onlyOwner, upload.single("image"), (req, res) => {
   try {
-    const { name, price, category, description, imageUrl } = req.body;
+    const { name, price, category, description, imageUrl, image } = req.body;
 
     if (!name || !price) {
       return res.status(400).json({
@@ -185,18 +173,23 @@ app.post("/add", onlyOwner, upload.single("image"), (req, res) => {
     }
 
     let imageWebPath = "";
-    if (req.file) {
-      // تجهيز مسار الصورة المرفوعة محلياً
-      imageWebPath = "upload/" + req.file.filename;
+    if (req.file && req.file.buffer) {
+      // تحويل الصورة المرفوعة إلى Data URL لتعمل على السحابة و Vercel بدون مشاكل
+      imageWebPath = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
     } else if (imageUrl && imageUrl.trim()) {
       // استخدام رابط الصورة المباشر
       imageWebPath = imageUrl.trim();
+    } else if (image && image.trim()) {
+      // استخدام الصورة المرسلة كنص أو Base64
+      imageWebPath = image.trim();
     } else {
       return res.status(400).json({
         success: false,
         message: "يرجى اختيار صورة للمنتج أو وضع رابط صورة مباشر"
       });
     }
+
+    const products = loadProducts();
 
     const newProduct = {
       id: Date.now().toString(),
@@ -220,7 +213,7 @@ app.post("/add", onlyOwner, upload.single("image"), (req, res) => {
     console.error("خطأ أثناء إضافة المنتج:", err);
     res.status(500).json({
       success: false,
-      message: "حدث خطأ غير متوقع أثناء حفظ المنتج"
+      message: "حدث خطأ غير متوقع أثناء حفظ المنتج: " + (err.message || err)
     });
   }
 });
