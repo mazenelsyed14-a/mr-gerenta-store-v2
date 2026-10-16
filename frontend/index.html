@@ -224,7 +224,7 @@
       list.forEach(p => {
         // تحديد مسار الصورة الصحيح
         let imgSrc = p.image || "";
-        if (!imgSrc.startsWith("http://") && !imgSrc.startsWith("https://")) {
+        if (!imgSrc.startsWith("http://") && !imgSrc.startsWith("https://") && !imgSrc.startsWith("data:")) {
           imgSrc = `${API_BASE}/${p.image.replace(/^[/\\]+/, '')}`;
         }
 
@@ -396,7 +396,7 @@
         totalSum += itemTotal;
 
         let imgSrc = item.image || "";
-        if (!imgSrc.startsWith("http://") && !imgSrc.startsWith("https://")) {
+        if (!imgSrc.startsWith("http://") && !imgSrc.startsWith("https://") && !imgSrc.startsWith("data:")) {
           imgSrc = `${API_BASE}/${item.image.replace(/^[/\\]+/, '')}`;
         }
 
