@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة تحكم المالك | MR. GERENTA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+  <!-- ==================== شاشة تسجيل الدخول ==================== -->
+  <div id="loginView" class="auth-wrapper">
+    <div class="auth-card">
+      <div class="auth-header">
+        <div class="auth-logo"><i class="fa-solid fa-crown"></i></div>
+        <h2>لوحة تحكم المالك</h2>
+        <p>mr.gerenta &bull; إدارة المنتجات والطلبات</p>
+      </div>
+
+      <div id="loginError" class="alert-box error hidden"></div>
+
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label><i class="fa-solid fa-user"></i> اسم المستخدم</label>
+          <input type="text" id="loginUser" placeholder="أدخل اسم المستخدم" required autocomplete="username">
+        </div>
+
+        <div class="form-group">
+          <label><i class="fa-solid fa-lock"></i> كلمة المرور</label>
+          <input type="password" id="loginPass" placeholder="أدخل كلمة المرور" required autocomplete="current-password">
+        </div>
+
+        <button type="submit" class="admin-btn primary-btn" id="loginSubmitBtn">
+          <i class="fa-solid fa-arrow-right-to-bracket"></i> تسجيل الدخول
+        </button>
+
+        <a href="index.html" class="back-to-store-link">
+          <i class="fa-solid fa-arrow-right"></i> العودة للمتجر
+        </a>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== لوحة التحكم الرئيسية ==================== -->
+  <div id="dashboardView" class="dashboard-wrapper hidden">
+    <!-- الشريط العلوي للوحة التحكم -->
+    <header class="dash-header">
+      <div class="dash-header-container">
+        <div class="dash-brand">
+          <i class="fa-solid fa-crown gold-icon"></i>
+          <div>
+            <h1>MR. GERENTA <span>لوحة الإدارة</span></h1>
+          </div>
+        </div>
+
+        <div class="dash-actions">
+          <a href="index.html" target="_blank" class="admin-btn outline-btn" title="معاينة المتجر في صفحة جديدة">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> عرض المتجر
+          </a>
+          <button onclick="handleLogout()" class="admin-btn danger-btn" title="تسجيل الخروج">
+            <i class="fa-solid fa-power-off"></i> خروج
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="dash-container">
+      <!-- بطاقات الإحصائيات السريعة -->
+      <section class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-box-archive"></i></div>
+          <div class="stat-info">
+            <span class="stat-label">إجمالي المنتجات</span>
+            <strong class="stat-number" id="statTotal">0</strong>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-clock"></i></div>
+          <div class="stat-info">
+            <span class="stat-label">الساعات</span>
+            <strong class="stat-number" id="statWatches">0</strong>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-spray-can-sparkles"></i></div>
+          <div class="stat-info">
+            <span class="stat-label">العطور والبرفانات</span>
+            <strong class="stat-number" id="statPerfumes">0</strong>
+          </div>
+        </div>
+      </section>
+
+      <!-- الشبكة الرئيسية: إضافة منتج + قائمة المنتجات الحالية -->
+      <div class="content-grid">
+        <!-- قسم إضافة منتج جديد -->
+        <section class="panel-card form-panel">
+          <div class="panel-header">
+            <h3><i class="fa-solid fa-plus-circle"></i> إضافة منتج جديد</h3>
+          </div>
+
+          <form id="uploadForm" enctype="multipart/form-data" onsubmit="handleAddProduct(event)">
+            <div class="form-group">
+              <label>اسم المنتج *</label>
+              <input type="text" name="name" id="prodName" placeholder="مثال: ساعة رولكس دايتونا أو عطر سوفاج" required>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>القسم *</label>
+                <select name="category" id="prodCategory" required>
+                  <option value="ساعات">ساعات فاخرة</option>
+                  <option value="برفانات">عطور وبرفانات</option>
+                  <option value="إكسسوارات">إكسسوارات أخرى</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>السعر (بالجنيه المصري) *</label>
+                <input type="number" name="price" id="prodPrice" placeholder="مثال: 2500" min="1" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>وصف المنتج ومميزاته</label>
+              <textarea name="description" id="prodDesc" rows="3" placeholder="اكتب نبذة عن الماتريال، المواصفات، أو العطر..."></textarea>
+            </div>
+
+            <!-- خيارات إضافة صورة المنتج -->
+            <div class="form-group">
+              <label>صورة المنتج (رفع ملف أو رابط مباشر) *</label>
+              <input type="url" name="imageUrl" id="prodImageUrl" placeholder="أو الصق رابط صورة مباشر هنا (مثال: https://.../image.jpg)" oninput="handleImageUrlPreview(this.value)" style="margin-bottom: 10px;">
+              <div class="drop-zone" id="dropZone" onclick="document.getElementById('imageInput').click()">
+                <input type="file" name="image" id="imageInput" accept="image/*" style="display: none;" onchange="handleImagePreview(event)">
+                <div id="dropZonePrompt">
+                  <i class="fa-solid fa-cloud-arrow-up drop-icon"></i>
+                  <p>اضغط لاختيار صورة من جهازك / هاتفك أو اسحبها هنا</p>
+                  <span>يُقبل: JPG, PNG, WEBP (حجم أقصى 5 ميجا)</span>
+                </div>
+                <div id="imagePreviewContainer" class="image-preview-container hidden">
+                  <img id="imagePreview" src="" alt="معاينة الصورة">
+                  <button type="button" class="change-img-btn" onclick="document.getElementById('imageInput').click()">تغيير الصورة</button>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="admin-btn primary-btn submit-btn" id="submitProdBtn">
+              <i class="fa-solid fa-cloud-arrow-up"></i> رفع ونشر المنتج في المتجر
+            </button>
+          </form>
+        </section>
+
+        <!-- قسم المنتجات الحالية في المتجر -->
+        <section class="panel-card table-panel">
+          <div class="panel-header">
+            <h3><i class="fa-solid fa-list-check"></i> المنتجات الحالية المعروضة</h3>
+            <button class="refresh-btn" onclick="fetchAdminProducts()" title="تحديث القائمة">
+              <i class="fa-solid fa-rotate-right"></i>
+            </button>
+          </div>
+
+          <div class="table-responsive">
+            <table class="products-table">
+              <thead>
+                <tr>
+                  <th>الصورة</th>
+                  <th>اسم المنتج</th>
+                  <th>القسم</th>
+                  <th>السعر</th>
+                  <th>إجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="productsTableBody">
+                <!-- تملأ برمجياً -->
+              </tbody>
+            </table>
+          </div>
+
+          <div id="emptyTableState" class="empty-table hidden">
+            <i class="fa-solid fa-box-open"></i>
+            <p>لا توجد منتجات مضافة بعد. أضف أول منتج الآن!</p>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- توست الإشعارات -->
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const API_BASE = window.location.protocol.startsWith("http")
+      ? window.location.origin 
+      : "http://localhost:3000";
+
+    let productsList = [];
+
+    // عند تحميل الصفحة، فحص الجلسة الحالية
+    document.addEventListener("DOMContentLoaded", async () => {
+      await checkAuthStatus();
+    });
+
+    // التحقق من حالة تسجيل الدخول
+    async function checkAuthStatus() {
+      try {
+        const res = await fetch(`${API_BASE}/check-auth`, { credentials: "include" });
+        const data = await res.json();
+        if (data.authenticated) {
+          showDashboard();
+        } else {
+          showLogin();
+        }
+      } catch (err) {
+        showLogin();
+      }
+    }
+
+    function showDashboard() {
+      document.getElementById("loginView").classList.add("hidden");
+      document.getElementById("dashboardView").classList.remove("hidden");
+      fetchAdminProducts();
+    }
+
+    function showLogin() {
+      document.getElementById("dashboardView").classList.add("hidden");
+      document.getElementById("loginView").classList.remove("hidden");
+    }
+
+    // تسجيل الدخول
+    async function handleLogin(e) {
+      e.preventDefault();
+      const user = document.getElementById("loginUser").value.trim();
+      const pass = document.getElementById("loginPass").value.trim();
+      const errorBox = document.getElementById("loginError");
+      const btn = document.getElementById("loginSubmitBtn");
+
+      errorBox.classList.add("hidden");
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> جاري التحقق...`;
+
+      try {
+        const res = await fetch(`${API_BASE}/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user, pass }),
+          credentials: "include"
+        });
+
+        const data = await res.json();
+        if (res.ok && data.success) {
+          showToast("تم تسجيل الدخول بنجاح! أهلاً بك يا مالك المتجر.", "success");
+          showDashboard();
+        } else {
+          errorBox.innerText = data.message || "خطأ في اسم المستخدم أو كلمة المرور";
+          errorBox.classList.remove("hidden");
+        }
+      } catch (err) {
+        errorBox.innerText = "تعذر الاتصال بالخادم. تأكد من تشغيل السيرفر!";
+        errorBox.classList.remove("hidden");
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fa-solid fa-arrow-right-to-bracket"></i> تسجيل الدخول`;
+      }
+    }
+
+    // تسجيل الخروج
+    async function handleLogout() {
+      try {
+        await fetch(`${API_BASE}/logout`, { method: "POST", credentials: "include" });
+        showToast("تم تسجيل الخروج بنجاح.");
+      } catch (e) {}
+      showLogin();
+    }
+
+    // جلب المنتجات للوحة الإدارة
+    async function fetchAdminProducts() {
+      try {
+        const res = await fetch(`${API_BASE}/products`);
+        productsList = await res.json();
+        renderAdminProducts(productsList);
+        updateStats(productsList);
+      } catch (err) {
+        showToast("تعذر جلب المنتجات من الخادم", "error");
+      }
+    }
+
+    // تحديث الإحصائيات
+    function updateStats(list) {
+      document.getElementById("statTotal").innerText = list.length;
+      document.getElementById("statWatches").innerText = list.filter(p => p.category && p.category.includes("ساعات")).length;
+      document.getElementById("statPerfumes").innerText = list.filter(p => p.category && p.category.includes("برفانات")).length;
+    }
+
+    // عرض المنتجات في الجدول
+    function renderAdminProducts(list) {
+      const tbody = document.getElementById("productsTableBody");
+      const emptyState = document.getElementById("emptyTableState");
+      tbody.innerHTML = "";
+
+      if (!list || list.length === 0) {
+        emptyState.classList.remove("hidden");
+        return;
+      }
+      emptyState.classList.add("hidden");
+
+      list.forEach(p => {
+        let imgSrc = p.image || "";
+        if (!imgSrc.startsWith("http://") && !imgSrc.startsWith("https://")) {
+          imgSrc = `${API_BASE}/${p.image.replace(/^[/\\]+/, '')}`;
+        }
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>
+            <img src="${imgSrc}" class="table-thumb" alt="${p.name}" onerror="this.src='https://placehold.co/80x80/161920/d4af37?text=mr'">
+          </td>
+          <td>
+            <strong>${p.name}</strong>
+            <p class="table-desc-preview">${p.description || 'بدون وصف'}</p>
+          </td>
+          <td><span class="category-pill">${p.category || 'عام'}</span></td>
+          <td class="table-price">${Number(p.price).toLocaleString()} ج.م</td>
+          <td>
+            <button class="action-icon-btn delete-btn" onclick="handleDeleteProduct('${p.id}', '${p.name}')" title="حذف المنتج">
+              <i class="fa-solid fa-trash-can"></i> حذف
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // معاينة الصورة عبر الرابط المباشر
+    function handleImageUrlPreview(url) {
+      if (url && url.trim().length > 5) {
+        document.getElementById("imagePreview").src = url.trim();
+        document.getElementById("dropZonePrompt").classList.add("hidden");
+        document.getElementById("imagePreviewContainer").classList.remove("hidden");
+        // مسح اختيار الملف إذا اختار رابط مباشر
+        document.getElementById("imageInput").value = "";
+      }
+    }
+
+    // معاينة الصورة المختارة من الجهاز فورياً
+    function handleImagePreview(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          document.getElementById("imagePreview").src = event.target.result;
+          document.getElementById("dropZonePrompt").classList.add("hidden");
+          document.getElementById("imagePreviewContainer").classList.remove("hidden");
+          // مسح الرابط إذا اختار ملف
+          document.getElementById("prodImageUrl").value = "";
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    // إضافة منتج جديد
+    async function handleAddProduct(e) {
+      e.preventDefault();
+      const form = document.getElementById("uploadForm");
+      const fileInput = document.getElementById("imageInput");
+      const urlInput = document.getElementById("prodImageUrl");
+
+      if ((!fileInput.files || !fileInput.files[0]) && (!urlInput.value || !urlInput.value.trim())) {
+        showToast("يرجى اختيار صورة للمنتج أو كتابة رابط صورة مباشر!", "error");
+        return;
+      }
+
+      const submitBtn = document.getElementById("submitProdBtn");
+      const formData = new FormData(form);
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> جاري الرفع والنشر...`;
+
+      try {
+        const res = await fetch(`${API_BASE}/add`, {
+          method: "POST",
+          body: formData,
+          credentials: "include"
+        });
+
+        const data = await res.json();
+        if (res.ok && data.success) {
+          showToast("تم نشر المنتج في المتجر بنجاح! 👑", "success");
+          form.reset();
+          document.getElementById("dropZonePrompt").classList.remove("hidden");
+          document.getElementById("imagePreviewContainer").classList.add("hidden");
+          fetchAdminProducts();
+        } else {
+          showToast(data.message || "فشل رفع المنتج. تأكد من إدخال جميع البيانات.", "error");
+        }
+      } catch (err) {
+        showToast("حدث خطأ أثناء الاتصال بالخادم", "error");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> رفع ونشر المنتج في المتجر`;
+      }
+    }
+
+    // حذف منتج
+    async function handleDeleteProduct(id, name) {
+      if (!confirm(`هل أنت متأكد من حذف المنتج: "${name}" نهائياً من المتجر؟`)) {
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/products/${id}`, {
+          method: "DELETE",
+          credentials: "include"
+        });
+
+        const data = await res.json();
+        if (res.ok && data.success) {
+          showToast("تم حذف المنتج بنجاح", "success");
+          fetchAdminProducts();
+        } else {
+          showToast(data.message || "تعذر حذف المنتج", "error");
+        }
+      } catch (err) {
+        showToast("حدث خطأ أثناء محاولة الحذف", "error");
+      }
+    }
+
+    // توست الإشعارات
+    function showToast(message, type = "info") {
+      const toast = document.getElementById("toast");
+      toast.innerText = message;
+      toast.className = `toast show ${type}`;
+      setTimeout(() => {
+        toast.className = "toast";
+      }, 3500);
+    }
+  </script>
+</body>
+</html>

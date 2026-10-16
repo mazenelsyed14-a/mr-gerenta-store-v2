@@ -1,0 +1,56 @@
+[
+  {
+    "id": "1",
+    "name": "ساعة رولكس دايتونا كلاسيك - ستيل وفضي",
+    "price": 3850,
+    "category": "ساعات",
+    "description": "ساعة يد فاخرة بمينا أسود مميز مع زجاج مقاوم للخدش وحركة أوتوماتيكية دقيقة.",
+    "image": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&auto=format&fit=crop&q=80",
+    "createdAt": "2026-10-15T12:00:00.000Z"
+  },
+  {
+    "id": "2",
+    "name": "عطر سوفاج إلكسير - Dior Sauvage Elixir",
+    "price": 2100,
+    "category": "برفانات",
+    "description": "عطر رجالي شرقي منعش بنفحات التوابل والخزامى والأخشاب العطرية النادرة.",
+    "image": "https://images.unsplash.com/photo-1541643600914-78b084683601?w=800&auto=format&fit=crop&q=80",
+    "createdAt": "2026-10-15T12:10:00.000Z"
+  },
+  {
+    "id": "3",
+    "name": "ساعة أوديمار بيغيه رويال أوك - أوتوماتيك",
+    "price": 4500,
+    "category": "ساعات",
+    "description": "تصميم ثماني الأضلاع أيقوني من الفولاذ المصقول مع سوار مدمج مريح وفاخر.",
+    "image": "https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=800&auto=format&fit=crop&q=80",
+    "createdAt": "2026-10-15T12:20:00.000Z"
+  },
+  {
+    "id": "4",
+    "name": "عطر توم فورد توباكو فانيلا - Tom Ford",
+    "price": 2750,
+    "category": "برفانات",
+    "description": "توليفة راقية وفخمة من أوراق التبغ الفاخرة والفانيليا الكريمية الدافئة.",
+    "image": "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=800&auto=format&fit=crop&q=80",
+    "createdAt": "2026-10-15T12:30:00.000Z"
+  },
+  {
+    "id": "5",
+    "name": "ساعة كارتييه سانتوس - حزام جلد بني",
+    "price": 3200,
+    "category": "ساعات",
+    "description": "طابع كلاسيكي فرنسي راقٍ مع إطار مربع وأرقام رومانية بارزة وحزام جلد طبيعي.",
+    "image": "https://images.unsplash.com/photo-1539185441755-769473a23570?w=800&auto=format&fit=crop&q=80",
+    "createdAt": "2026-10-15T12:40:00.000Z"
+  },
+  {
+    "id": "6",
+    "name": "عطر كريد أفينتوس الملكي - Creed Aventus",
+    "price": 3100,
+    "category": "برفانات",
+    "description": "عطر القوة والجاذبية، يجمع بين نفحات الأناناس والبرغموت الدخاني والباتشولي.",
+    "image": "https://images.unsplash.com/photo-1588405748880-12d1d2a59f75?w=800&auto=format&fit=crop&q=80",
+    "createdAt": "2026-10-15T12:50:00.000Z"
+  }
+]

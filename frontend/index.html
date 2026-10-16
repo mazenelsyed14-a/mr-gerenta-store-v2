@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MR. GERENTA | متجر الساعات والعطور الفاخرة</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="product.css">
+</head>
+<body>
+
+  <!-- شريط الإعلان العلوي -->
+  <div class="top-announcement">
+    <span>✨ شحن سريع لجميع المحافظات &bull; معاينة المنتج قبل الاستلام &bull; دفع عند الاستلام &bull; خصومات مميزة لفترة محدودة ✨</span>
+  </div>
+
+  <!-- الهيدر وشريط التنقل -->
+  <header class="main-header">
+    <div class="header-container">
+      <div class="brand">
+        <a href="index.html" class="logo-link">
+          <div class="logo-icon"><i class="fa-solid fa-crown"></i></div>
+          <div class="logo-text">
+            <h1 class="logo-title">MR. GERENTA</h1>
+            <span class="logo-subtitle">مستر جيرنتا &bull; ساعات وبرفانات فاخرة</span>
+          </div>
+        </a>
+      </div>
+
+      <!-- مربع البحث السريع -->
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" id="searchInput" placeholder="ابحث عن ساعة، عطر، أو ماركة..." oninput="handleSearch()">
+      </div>
+
+      <!-- أزرار الإجراءات السريعة -->
+      <div class="header-actions">
+        <!-- زر فتح سلة المشتريات -->
+        <button class="action-btn cart-btn" id="openCartBtn" onclick="toggleCart(true)">
+          <i class="fa-solid fa-bag-shopping"></i>
+          <span class="btn-text">السلة</span>
+          <span class="cart-badge" id="cartBadge">0</span>
+        </button>
+
+        <!-- زر الانتقال للوحة المالك -->
+        <a href="admin.html" class="action-btn admin-link-btn" title="لوحة التحكم للمالك">
+          <i class="fa-solid fa-user-shield"></i>
+          <span class="btn-text">لوحة المالك</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- البانر الترحيبي والفلترة -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <span class="hero-badge">تشكيلة 2026 الحصرية</span>
+      <h2 class="hero-heading">عالم الفخامة والتميز بين يديك</h2>
+      <p class="hero-desc">اختر من بين تشكيلاتنا الاستثنائية من الساعات العالمية الأصلية وأرقى العطور النادرة بأسعار تنافسية وضمان حقيقي.</p>
+
+      <!-- أزرار تصفية الأقسام -->
+      <div class="filter-tabs">
+        <button class="filter-tab active" data-category="all" onclick="filterCategory('all', this)">
+          <i class="fa-solid fa-border-all"></i> جميع المنتجات
+        </button>
+        <button class="filter-tab" data-category="ساعات" onclick="filterCategory('ساعات', this)">
+          <i class="fa-solid fa-clock"></i> ساعات فاخرة
+        </button>
+        <button class="filter-tab" data-category="برفانات" onclick="filterCategory('برفانات', this)">
+          <i class="fa-solid fa-spray-can-sparkles"></i> عطور وبرفانات
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- قسم عرض المنتجات -->
+  <main class="products-section">
+    <div class="container">
+      <div class="section-header">
+        <h3 class="section-title" id="currentCategoryTitle">كل المعروضات</h3>
+        <span class="product-count" id="productCount">جاري التحميل...</span>
+      </div>
+
+      <!-- شبكة المنتجات -->
+      <div id="productsGrid" class="products-grid">
+        <!-- يتم ملء المنتجات برمجياً عبر جافاسكريبت -->
+      </div>
+
+      <!-- حالة عدم وجود نتائج -->
+      <div id="noResults" class="no-results hidden">
+        <i class="fa-solid fa-box-open"></i>
+        <h4>لا توجد منتجات مطابقة لبحثك</h4>
+        <p>جرب البحث بكلمات أخرى أو تصفح كل الأقسام.</p>
+        <button class="reset-btn" onclick="resetFilters()">عرض جميع المنتجات</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- نافذة سلة المشتريات (Drawer) -->
+  <div class="cart-overlay" id="cartOverlay" onclick="toggleCart(false)"></div>
+  <aside class="cart-drawer" id="cartDrawer">
+    <div class="cart-header">
+      <div class="cart-header-title">
+        <i class="fa-solid fa-bag-shopping"></i>
+        <h3>سلة المشتريات</h3>
+      </div>
+      <button class="close-cart-btn" onclick="toggleCart(false)">&times;</button>
+    </div>
+
+    <!-- قائمة عناصر السلة -->
+    <div class="cart-items" id="cartItemsContainer">
+      <!-- تظهر هنا العناصر المضافة -->
+    </div>
+
+    <!-- إجمالي السلة ونموذج إتمام الطلب -->
+    <div class="cart-footer" id="cartFooter">
+      <div class="cart-total-row">
+        <span>الإجمالي المطلوب:</span>
+        <strong id="cartTotalPrice">0 جنيه</strong>
+      </div>
+
+      <div class="checkout-form">
+        <h4>بيانات التوصيل السريع:</h4>
+        <input type="text" id="custName" placeholder="الاسم بالكامل *" required>
+        <input type="tel" id="custPhone" placeholder="رقم الهاتف للتواصل *" required>
+        <input type="text" id="custAddress" placeholder="المحافظة والعنوان بالتفصيل *" required>
+
+        <button class="checkout-whatsapp-btn" onclick="checkoutViaWhatsApp()">
+          <i class="fa-brands fa-whatsapp"></i> تأكيد الطلب عبر واتساب
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- الفوتر الفاخر -->
+  <footer class="main-footer">
+    <div class="footer-container">
+      <div class="footer-col">
+        <div class="footer-brand">MR. GERENTA</div>
+        <p>وجهتك الأولى لاقتناء أفخم الساعات العالمية وأندر العطور الشرقية والغربية. نلتزم بأعلى معايير الجودة ورضا العملاء.</p>
+      </div>
+      <div class="footer-col">
+        <h4>روابط سريعة</h4>
+        <ul>
+          <li><a href="#" onclick="filterCategory('ساعات')">قسم الساعات</a></li>
+          <li><a href="#" onclick="filterCategory('برفانات')">قسم البرفانات</a></li>
+          <li><a href="admin.html">لوحة تحكم الإدارة</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>خدمة العملاء</h4>
+        <p><i class="fa-brands fa-whatsapp"></i> واتساب: 01000000000</p>
+        <p><i class="fa-solid fa-shield-halved"></i> معاينة الطلب قبل الاستلام 100%</p>
+        <p><i class="fa-solid fa-truck-fast"></i> توصيل لجميع محافظات مصر</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 جميع الحقوق محفوظة لمتجر <strong>mr.gerenta</strong> &bull; تم التطوير بأعلى معايير التقنية</p>
+    </div>
+  </footer>
+
+  <!-- إشعار التوست العائم -->
+  <div id="toast" class="toast"></div>
+
+  <!-- سكربت التحكم بالمتجر -->
+  <script>
+    // عنوان الخادم الأساسي (يتعرف تلقائياً عند التشغيل محلياً أو على أي استضافة أونلاين)
+    const API_BASE = window.location.protocol.startsWith("http")
+      ? window.location.origin 
+      : "http://localhost:3000";
+
+    // رقم هاتف واتساب الخاص بمتجر mr.gerenta (يمكنك تغييره لرقمك الحقيقي)
+    const STORE_WHATSAPP_NUMBER = "201000000000";
+
+    let allProducts = [];
+    let currentFilter = "all";
+    let cart = JSON.parse(localStorage.getItem("mrgerenta_cart") || "[]");
+
+    // تحميل المنتجات عند فتح الصفحة
+    document.addEventListener("DOMContentLoaded", () => {
+      fetchProducts();
+      updateCartUI();
+    });
+
+    // جلب المنتجات من الباك إند
+    async function fetchProducts() {
+      try {
+        const res = await fetch(`${API_BASE}/products`);
+        if (!res.ok) throw new Error("تعذر جلب المنتجات");
+        allProducts = await res.json();
+        renderProducts(allProducts);
+      } catch (err) {
+        console.error(err);
+        showToast("تعذر الاتصال بالسيرفر! تأكد من تشغيل الباك إند.", "error");
+        document.getElementById("productsGrid").innerHTML = `
+          <div class="server-error">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <h3>تعذر الاتصال بخادم الباك إند</h3>
+            <p>تأكد من فتح التيرمينال داخل مجلد backend وتشغيل الأمر: <code>node server.js</code></p>
+          </div>
+        `;
+      }
+    }
+
+    // عرض المنتجات في الشبكة
+    function renderProducts(list) {
+      const grid = document.getElementById("productsGrid");
+      const noResults = document.getElementById("noResults");
+      const productCount = document.getElementById("productCount");
+
+      grid.innerHTML = "";
+      productCount.innerText = `${list.length} منتج متاح`;
+
+      if (!list || list.length === 0) {
+        noResults.classList.remove("hidden");
+        return;
+      }
+
+      noResults.classList.add("hidden");
+
+      list.forEach(p => {
+        // تحديد مسار الصورة الصحيح
+        let imgSrc = p.image || "";
+        if (!imgSrc.startsWith("http://") && !imgSrc.startsWith("https://")) {
+          imgSrc = `${API_BASE}/${p.image.replace(/^[/\\]+/, '')}`;
+        }
+
+        const card = document.createElement("div");
+        card.className = "product-card";
+        card.innerHTML = `
+          <div class="card-badge">${p.category || 'فاخر'}</div>
+          <div class="image-wrapper">
+            <img src="${imgSrc}" alt="${p.name}" loading="lazy" onerror="this.src='https://placehold.co/600x600/161920/d4af37?text=${encodeURIComponent(p.name)}'">
+          </div>
+          <div class="card-body">
+            <h3 class="card-title">${p.name}</h3>
+            <p class="card-desc">${p.description || 'قطعة مختارة بعناية فائقة تمثل قمة الذوق والأناقة.'}</p>
+            <div class="card-pricing">
+              <span class="price-value">${Number(p.price).toLocaleString()}</span>
+              <span class="price-currency">جنيه مصري</span>
+            </div>
+            <div class="card-actions">
+              <button class="btn btn-primary" onclick="addToCart('${p.id}')">
+                <i class="fa-solid fa-cart-plus"></i> أضف للسلة
+              </button>
+              <button class="btn btn-whatsapp" onclick="directWhatsAppOrder('${p.id}')" title="طلب مباشر">
+                <i class="fa-brands fa-whatsapp"></i> واتساب
+              </button>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // تصفية حسب القسم
+    function filterCategory(category, buttonElement) {
+      currentFilter = category;
+      
+      // تحديث أزرار التبويب
+      document.querySelectorAll(".filter-tab").forEach(b => b.classList.remove("active"));
+      if (buttonElement) {
+        buttonElement.classList.add("active");
+      }
+
+      const titleMap = {
+        "all": "كل المعروضات",
+        "ساعات": "تشكيلة الساعات الفاخرة",
+        "برفانات": "تشكيلة العطور والبرفانات"
+      };
+      document.getElementById("currentCategoryTitle").innerText = titleMap[category] || category;
+
+      applyFilters();
+    }
+
+    // البحث اللحظي
+    function handleSearch() {
+      applyFilters();
+    }
+
+    // تطبيق البحث مع الفلترة
+    function applyFilters() {
+      const query = document.getElementById("searchInput").value.trim().toLowerCase();
+      let filtered = allProducts;
+
+      if (currentFilter !== "all") {
+        filtered = filtered.filter(p => p.category && p.category.includes(currentFilter));
+      }
+
+      if (query) {
+        filtered = filtered.filter(p => 
+          (p.name && p.name.toLowerCase().includes(query)) ||
+          (p.description && p.description.toLowerCase().includes(query)) ||
+          (p.category && p.category.toLowerCase().includes(query))
+        );
+      }
+
+      renderProducts(filtered);
+    }
+
+    function resetFilters() {
+      document.getElementById("searchInput").value = "";
+      filterCategory("all", document.querySelector('.filter-tab[data-category="all"]'));
+    }
+
+    // ==================== نظام السلة وإتمام الطلب ==================== //
+
+    function toggleCart(show) {
+      const drawer = document.getElementById("cartDrawer");
+      const overlay = document.getElementById("cartOverlay");
+      if (show) {
+        drawer.classList.add("open");
+        overlay.classList.add("open");
+      } else {
+        drawer.classList.remove("open");
+        overlay.classList.remove("open");
+      }
+    }
+
+    function addToCart(productId) {
+      const product = allProducts.find(p => String(p.id) === String(productId));
+      if (!product) return;
+
+      const existingItem = cart.find(item => String(item.id) === String(productId));
+      if (existingItem) {
+        existingItem.qty += 1;
+      } else {
+        cart.push({
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          image: product.image,
+          qty: 1
+        });
+      }
+
+      saveCart();
+      updateCartUI();
+      showToast(`تمت إضافة "${product.name}" إلى السلة 🛍️`);
+      toggleCart(true);
+    }
+
+    function updateCartQty(productId, delta) {
+      const item = cart.find(i => String(i.id) === String(productId));
+      if (!item) return;
+
+      item.qty += delta;
+      if (item.qty <= 0) {
+        cart = cart.filter(i => String(i.id) !== String(productId));
+      }
+      saveCart();
+      updateCartUI();
+    }
+
+    function removeFromCart(productId) {
+      cart = cart.filter(i => String(i.id) !== String(productId));
+      saveCart();
+      updateCartUI();
+      showToast("تم حذف المنتج من السلة");
+    }
+
+    function saveCart() {
+      localStorage.setItem("mrgerenta_cart", JSON.stringify(cart));
+    }
+
+    function updateCartUI() {
+      const badge = document.getElementById("cartBadge");
+      const itemsContainer = document.getElementById("cartItemsContainer");
+      const totalPriceEl = document.getElementById("cartTotalPrice");
+      const cartFooter = document.getElementById("cartFooter");
+
+      const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
+      badge.innerText = totalQty;
+
+      if (cart.length === 0) {
+        itemsContainer.innerHTML = `
+          <div class="empty-cart-state">
+            <i class="fa-solid fa-basket-shopping"></i>
+            <p>سلة مشترياتك فارغة حتى الآن</p>
+            <span>اختر ما يناسبك من تشكيلاتنا وأضفه هنا!</span>
+          </div>
+        `;
+        cartFooter.style.display = "none";
+        return;
+      }
+
+      cartFooter.style.display = "block";
+      let totalSum = 0;
+      itemsContainer.innerHTML = "";
+
+      cart.forEach(item => {
+        const itemTotal = item.price * item.qty;
+        totalSum += itemTotal;
+
+        let imgSrc = item.image || "";
+        if (!imgSrc.startsWith("http://") && !imgSrc.startsWith("https://")) {
+          imgSrc = `${API_BASE}/${item.image.replace(/^[/\\]+/, '')}`;
+        }
+
+        const div = document.createElement("div");
+        div.className = "cart-item-row";
+        div.innerHTML = `
+          <img src="${imgSrc}" alt="${item.name}" class="cart-item-img" onerror="this.src='https://placehold.co/100x100/161920/d4af37?text=mr'">
+          <div class="cart-item-info">
+            <h4 class="cart-item-title">${item.name}</h4>
+            <span class="cart-item-price">${Number(item.price).toLocaleString()} جنيه</span>
+            <div class="qty-controls">
+              <button class="qty-btn" onclick="updateCartQty('${item.id}', -1)">-</button>
+              <span class="qty-number">${item.qty}</span>
+              <button class="qty-btn" onclick="updateCartQty('${item.id}', 1)">+</button>
+            </div>
+          </div>
+          <button class="remove-item-btn" onclick="removeFromCart('${item.id}')" title="حذف">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+        `;
+        itemsContainer.appendChild(div);
+      });
+
+      totalPriceEl.innerText = `${totalSum.toLocaleString()} جنيه`;
+    }
+
+    // إتمام الطلب الشامل عبر واتساب
+    function checkoutViaWhatsApp() {
+      const name = document.getElementById("custName").value.trim();
+      const phone = document.getElementById("custPhone").value.trim();
+      const address = document.getElementById("custAddress").value.trim();
+
+      if (!name || !phone || !address) {
+        showToast("يرجى ملء جميع بيانات التوصيل أولاً!", "error");
+        return;
+      }
+
+      if (cart.length === 0) {
+        showToast("السلة فارغة!", "error");
+        return;
+      }
+
+      let orderText = `*طلب جديد من متجر mr.gerenta*\n\n`;
+      orderText += `👤 *اسم العميل:* ${name}\n`;
+      orderText += `📞 *رقم الهاتف:* ${phone}\n`;
+      orderText += `📍 *عنوان التوصيل:* ${address}\n\n`;
+      orderText += `🛍️ *المنتجات المطلوبة:*\n`;
+
+      let totalSum = 0;
+      cart.forEach((item, index) => {
+        const itemTotal = item.price * item.qty;
+        totalSum += itemTotal;
+        orderText += `${index + 1}) ${item.name} (الكمية: ${item.qty}) - السعر: ${itemTotal.toLocaleString()} جنيه\n`;
+      });
+
+      orderText += `\n💰 *إجمالي الفاتورة:* ${totalSum.toLocaleString()} جنيه مصري`;
+      orderText += `\n\n🚚 *طريقة الدفع:* الدفع عند الاستلام مع المعاينة قبل الدفع.`;
+
+      const encodedUrl = `https://wa.me/${STORE_WHATSAPP_NUMBER}?text=${encodeURIComponent(orderText)}`;
+      window.open(encodedUrl, "_blank");
+
+      // تفريغ السلة بعد إرسال الطلب
+      cart = [];
+      saveCart();
+      updateCartUI();
+      toggleCart(false);
+      showToast("تم توجيهك إلى واتساب لإتمام الطلب بنجاح! شكراً لك.", "success");
+    }
+
+    // طلب منتج مفرد مباشرة عبر واتساب
+    function directWhatsAppOrder(productId) {
+      const product = allProducts.find(p => String(p.id) === String(productId));
+      if (!product) return;
+
+      const message = `مرحباً متجر *mr.gerenta*،\nأود طلب المنتج التالي:\n- *الاسم:* ${product.name}\n- *القسم:* ${product.category || 'عام'}\n- *السعر:* ${Number(product.price).toLocaleString()} جنيه\n\nأرجو تزويدي بتفاصيل التوصيل والميعاد المتاح. شكراً!`;
+      const encodedUrl = `https://wa.me/${STORE_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+      window.open(encodedUrl, "_blank");
+    }
+
+    // إظهار رسائل التنبيه التوست
+    function showToast(message, type = "info") {
+      const toast = document.getElementById("toast");
+      toast.innerText = message;
+      toast.className = `toast show ${type}`;
+      setTimeout(() => {
+        toast.className = "toast";
+      }, 3500);
+    }
+  </script>
+</body>
+</html>
