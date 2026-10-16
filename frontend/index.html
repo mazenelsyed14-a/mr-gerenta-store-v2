@@ -152,7 +152,7 @@
       </div>
       <div class="footer-col">
         <h4>خدمة العملاء</h4>
-        <p><i class="fa-brands fa-whatsapp"></i> واتساب: 01000000000</p>
+        <p><i class="fa-brands fa-whatsapp"></i> واتساب: 01223668538</p>
         <p><i class="fa-solid fa-shield-halved"></i> معاينة الطلب قبل الاستلام 100%</p>
         <p><i class="fa-solid fa-truck-fast"></i> توصيل لجميع محافظات مصر</p>
       </div>
@@ -173,7 +173,7 @@
       : "http://localhost:3000";
 
     // رقم هاتف واتساب الخاص بمتجر mr.gerenta (يمكنك تغييره لرقمك الحقيقي)
-    const STORE_WHATSAPP_NUMBER = "201000000000";
+    const STORE_WHATSAPP_NUMBER = "201223668538";
 
     let allProducts = [];
     let currentFilter = "all";
@@ -439,7 +439,7 @@
         return;
       }
 
-      let orderText = `*طلب جديد من متجر mr.gerenta*\n\n`;
+      let orderText = `السلام عليكم ورحمة الله،\n*طلب جديد من متجر mr.gerenta*\n\n`;
       orderText += `👤 *اسم العميل:* ${name}\n`;
       orderText += `📞 *رقم الهاتف:* ${phone}\n`;
       orderText += `📍 *عنوان التوصيل:* ${address}\n\n`;
@@ -471,7 +471,7 @@
       const product = allProducts.find(p => String(p.id) === String(productId));
       if (!product) return;
 
-      const message = `مرحباً متجر *mr.gerenta*،\nأود طلب المنتج التالي:\n- *الاسم:* ${product.name}\n- *القسم:* ${product.category || 'عام'}\n- *السعر:* ${Number(product.price).toLocaleString()} جنيه\n\nأرجو تزويدي بتفاصيل التوصيل والميعاد المتاح. شكراً!`;
+      const message = `السلام عليكم،\nأود طلب المنتج التالي من متجر *mr.gerenta*:\n- *الاسم:* ${product.name}\n- *القسم:* ${product.category || 'عام'}\n- *السعر:* ${Number(product.price).toLocaleString()} جنيه\n\nأرجو تزويدي بتفاصيل التوصيل والميعاد المتاح. شكراً!`;
       const encodedUrl = `https://wa.me/${STORE_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
       window.open(encodedUrl, "_blank");
     }
