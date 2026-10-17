@@ -215,6 +215,24 @@
       productCount.innerText = `${list.length} منتج متاح`;
 
       if (!list || list.length === 0) {
+        const query = (document.getElementById("searchInput")?.value || "").trim();
+        if (query || currentFilter !== "all") {
+          noResults.innerHTML = `
+            <i class="fa-solid fa-box-open"></i>
+            <h4>لا توجد منتجات مطابقة لبحثك</h4>
+            <p>جرب البحث بكلمات أخرى أو تصفح كل الأقسام.</p>
+            <button class="reset-btn" onclick="resetFilters()">عرض جميع المعروضات</button>
+          `;
+        } else {
+          noResults.innerHTML = `
+            <i class="fa-solid fa-crown" style="color: var(--gold-primary); font-size: 3rem; margin-bottom: 12px; display: block;"></i>
+            <h4>أهلاً بكم في متجر MR. GERENTA</h4>
+            <p>جاري إضافة أحدث تشكيلات الساعات والعطور الحصرية، ترقبوا المنتجات الجديدة قريباً!</p>
+            <a href="https://wa.me/201223668538?text=${encodeURIComponent('السلام عليكم، أود الاستفسار عن الموديلات المتاحة لدى متجر mr.gerenta')}" target="_blank" class="reset-btn" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px; margin-top: 15px;">
+              <i class="fa-brands fa-whatsapp"></i> تواصل معنا عبر واتساب
+            </a>
+          `;
+        }
         noResults.classList.remove("hidden");
         return;
       }
