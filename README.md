@@ -45,8 +45,8 @@ mr-gerenta-store/
 
 ## 🔑 بيانات تسجيل دخول المالك (Admin Credentials)
 
-- **اسم المستخدم:** `mazen elsyed5060`
-- **كلمة المرور:** `Mazen 3safra2523`
+- **اسم المستخدم:** `mohamedesslam1`
+- **كلمة المرور:** `mohamedesslam273`
 
 ---
 
