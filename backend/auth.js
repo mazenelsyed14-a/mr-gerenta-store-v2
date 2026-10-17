@@ -2,8 +2,8 @@
 
 // بيانات تسجيل دخول المالك الافتراضية
 const ADMIN_CONFIG = {
-  username: process.env.ADMIN_USER || "mazen elsyed5060",
-  password: process.env.ADMIN_PASS || "Mazen 3safra2523",
+  username: process.env.ADMIN_USER || "mohamedesslam1",
+  password: process.env.ADMIN_PASS || "mohamedesslam273",
   sessionSecret: process.env.SESSION_SECRET || "mrgerenta_secret_key_2026_luxury"
 };
 
