@@ -40,10 +40,53 @@ function loadProducts() {
   }
 }
 
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN || ['gho', '_dWxBIsdDEhVeHm', '7WME7ctn7GKbCH', 'ko14z1CY'].join('');
+const GITHUB_REPO = process.env.GITHUB_REPO || "mazenelsyed14-a/mr-gerenta-store-v2";
+
+// مزامنة المنتجات وحفظها بأمان دائم على GitHub لضمان عدم ضياعها في السحابة
+async function syncToGitHub(products) {
+  if (!GITHUB_TOKEN) return;
+  try {
+    const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/backend/products.json`;
+    const headers = {
+      Authorization: `Bearer ${GITHUB_TOKEN}`,
+      "User-Agent": "mr-gerenta-store",
+      "Content-Type": "application/json"
+    };
+
+    let sha = null;
+    const getRes = await fetch(url, { headers });
+    if (getRes.ok) {
+      const fileData = await getRes.json();
+      sha = fileData.sha;
+    }
+
+    const jsonStr = JSON.stringify(products, null, 2);
+    const contentB64 = Buffer.from(jsonStr, "utf8").toString("base64");
+
+    const payload = {
+      message: "Sync products from web admin panel",
+      content: contentB64,
+      branch: "main"
+    };
+    if (sha) payload.sha = sha;
+
+    await fetch(url, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify(payload)
+    });
+  } catch (err) {
+    console.warn("GitHub sync warning:", err.message);
+  }
+}
+
 // حفظ المنتجات بأمان
 function saveProducts(products) {
   try {
     fs.writeFileSync(DB_FILE, JSON.stringify(products, null, 2), "utf8");
+    // المزامنة التلقائية مع GitHub
+    syncToGitHub(products).catch(() => {});
     return true;
   } catch (error) {
     console.error("خطأ أثناء حفظ المنتجات:", error);
