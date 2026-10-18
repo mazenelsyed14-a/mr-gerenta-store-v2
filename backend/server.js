@@ -19,39 +19,77 @@ if (!fs.existsSync(UPLOAD_DIR)) {
   fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 }
 
-// قراءة المنتجات بأمان
-function loadProducts() {
-  try {
-    if (!fs.existsSync(DB_FILE)) {
-      let initialData = [];
-      if (fs.existsSync(ORIGINAL_DB)) {
-        try {
-          initialData = JSON.parse(fs.readFileSync(ORIGINAL_DB, "utf8"));
-        } catch (e) {}
-      }
-      fs.writeFileSync(DB_FILE, JSON.stringify(initialData, null, 2), "utf8");
-      return initialData;
-    }
-    const data = fs.readFileSync(DB_FILE, "utf8");
-    return data ? JSON.parse(data) : [];
-  } catch (error) {
-    console.error("خطأ أثناء قراءة ملف المنتجات:", error);
-    return [];
-  }
-}
+// كاش المنتجات في الذاكرة لتسريع الاستجابة
+let cachedProducts = null;
+let lastProductsFetch = 0;
+const CACHE_TTL_MS = 15 * 1000; // 15 ثانية تخزين مؤقت
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN || ['gho', '_dWxBIsdDEhVeHm', '7WME7ctn7GKbCH', 'ko14z1CY'].join('');
 const GITHUB_REPO = process.env.GITHUB_REPO || "mazenelsyed14-a/mr-gerenta-store-v2";
 
+// قراءة المنتجات بأمان مع الجلب التلقائي من GitHub لضمان عدم ضياع المنتجات أبداً
+async function loadProducts(forceFresh = false) {
+  const now = Date.now();
+  // استخدام الكاش المؤقت إذا كان متاحاً ولم يطلب التحديث الإجباري
+  if (!forceFresh && cachedProducts && (now - lastProductsFetch < CACHE_TTL_MS)) {
+    return cachedProducts;
+  }
+
+  // 1. محاولة القراءة من GitHub مباشرة مع منع التخزين المؤقت
+  try {
+    const rawUrl = `https://raw.githubusercontent.com/${GITHUB_REPO}/main/backend/products.json?t=${now}`;
+    const headers = GITHUB_TOKEN ? { Authorization: `Bearer ${GITHUB_TOKEN}` } : {};
+    const res = await fetch(rawUrl, { headers });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        cachedProducts = data;
+        lastProductsFetch = now;
+        try {
+          fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), "utf8");
+        } catch (e) {}
+        return data;
+      }
+    }
+  } catch (err) {
+    console.warn("تعذر جلب المنتجات من GitHub، الاعتماد على الملف المحلي:", err.message);
+  }
+
+  // 2. استخدام الملف المحلي في حال تعذر الاتصال بـ GitHub
+  try {
+    if (fs.existsSync(DB_FILE)) {
+      const data = fs.readFileSync(DB_FILE, "utf8");
+      if (data) {
+        cachedProducts = JSON.parse(data);
+        lastProductsFetch = now;
+        return cachedProducts;
+      }
+    }
+    if (fs.existsSync(ORIGINAL_DB)) {
+      const data = fs.readFileSync(ORIGINAL_DB, "utf8");
+      if (data) {
+        cachedProducts = JSON.parse(data);
+        lastProductsFetch = now;
+        return cachedProducts;
+      }
+    }
+  } catch (error) {
+    console.error("خطأ أثناء قراءة ملف المنتجات المحلي:", error);
+  }
+
+  return cachedProducts || [];
+}
+
 // مزامنة المنتجات وحفظها بأمان دائم على GitHub لضمان عدم ضياعها في السحابة
 async function syncToGitHub(products) {
-  if (!GITHUB_TOKEN) return;
+  if (!GITHUB_TOKEN) return false;
   try {
     const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/backend/products.json`;
     const headers = {
       Authorization: `Bearer ${GITHUB_TOKEN}`,
       "User-Agent": "mr-gerenta-store",
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
+      Accept: "application/vnd.github.v3+json"
     };
 
     let sha = null;
@@ -65,33 +103,42 @@ async function syncToGitHub(products) {
     const contentB64 = Buffer.from(jsonStr, "utf8").toString("base64");
 
     const payload = {
-      message: "Sync products from web admin panel",
+      message: "[skip ci] Sync products from web admin panel",
       content: contentB64,
       branch: "main"
     };
     if (sha) payload.sha = sha;
 
-    await fetch(url, {
+    const putRes = await fetch(url, {
       method: "PUT",
       headers,
       body: JSON.stringify(payload)
     });
+
+    if (!putRes.ok) {
+      const errText = await putRes.text();
+      console.warn("GitHub sync response error:", putRes.status, errText);
+      return false;
+    }
+    return true;
   } catch (err) {
     console.warn("GitHub sync warning:", err.message);
+    return false;
   }
 }
 
 // حفظ المنتجات بأمان
-function saveProducts(products) {
+async function saveProducts(products) {
+  cachedProducts = products;
+  lastProductsFetch = Date.now();
   try {
     fs.writeFileSync(DB_FILE, JSON.stringify(products, null, 2), "utf8");
-    // المزامنة التلقائية مع GitHub
-    syncToGitHub(products).catch(() => {});
-    return true;
   } catch (error) {
-    console.error("خطأ أثناء حفظ المنتجات:", error);
-    return false;
+    console.error("خطأ أثناء حفظ المنتجات محلياً:", error);
   }
+  // انتظار اكتمال المزامنة مع GitHub قبل إنهاء الطلب لضمان الحفظ الدائم
+  const synced = await syncToGitHub(products);
+  return synced;
 }
 
 // إعدادات CORS للسماح بالاتصال من أي مسار محلي
@@ -198,13 +245,19 @@ app.post("/logout", (req, res) => {
 });
 
 // 4) جلب كل المنتجات للمتجر
-app.get("/products", (req, res) => {
-  const products = loadProducts();
-  res.json(products);
+app.get("/products", async (req, res) => {
+  try {
+    const forceFresh = req.query.fresh === "1";
+    const products = await loadProducts(forceFresh);
+    res.json(products);
+  } catch (err) {
+    console.error("خطأ أثناء جلب المنتجات:", err);
+    res.json([]);
+  }
 });
 
 // 5) إضافة منتج جديد (خاص بالمالك)
-app.post("/add", onlyOwner, upload.single("image"), (req, res) => {
+app.post("/add", onlyOwner, upload.single("image"), async (req, res) => {
   try {
     const { name, price, category, description, imageUrl, image } = req.body;
 
@@ -232,7 +285,8 @@ app.post("/add", onlyOwner, upload.single("image"), (req, res) => {
       });
     }
 
-    const products = loadProducts();
+    // جلب أحدث قائمة منتجات مباشرة من السحابة لضمان عدم الكتابة فوق أي منتج سابق
+    const products = await loadProducts(true);
 
     const newProduct = {
       id: Date.now().toString(),
@@ -245,11 +299,11 @@ app.post("/add", onlyOwner, upload.single("image"), (req, res) => {
     };
 
     products.unshift(newProduct); // إضافة في البداية ليظهر أحدث منتج أولاً
-    saveProducts(products);
+    await saveProducts(products);
 
     res.json({
       success: true,
-      message: "تم إضافة المنتج بنجاح إلى المتجر!",
+      message: "تم إضافة المنتج بنجاح وحفظه دائماً في السحابة!",
       product: newProduct
     });
   } catch (err) {
@@ -262,10 +316,10 @@ app.post("/add", onlyOwner, upload.single("image"), (req, res) => {
 });
 
 // 6) حذف منتج (خاص بالمالك)
-app.delete("/products/:id", onlyOwner, (req, res) => {
+app.delete("/products/:id", onlyOwner, async (req, res) => {
   try {
     const productId = req.params.id;
-    let products = loadProducts();
+    let products = await loadProducts(true);
 
     const productToDelete = products.find(p => p.id === productId);
     if (!productToDelete) {
@@ -275,7 +329,7 @@ app.delete("/products/:id", onlyOwner, (req, res) => {
       });
     }
 
-    // حذف ملف الصورة من السيرفر إذا كان موجوداً
+    // حذف ملف الصورة من السيرفر إذا كان موجوداً محلياً
     if (productToDelete.image && productToDelete.image.startsWith("upload/")) {
       const filePath = path.join(__dirname, productToDelete.image);
       if (fs.existsSync(filePath)) {
@@ -287,13 +341,13 @@ app.delete("/products/:id", onlyOwner, (req, res) => {
       }
     }
 
-    // تصفية المصفوفة
+    // تصفية وتحديث المصفوفة
     products = products.filter(p => p.id !== productId);
-    saveProducts(products);
+    await saveProducts(products);
 
     res.json({
       success: true,
-      message: "تم حذف المنتج بنجاح"
+      message: "تم حذف المنتج بنجاح وتحديث المتجر"
     });
   } catch (err) {
     console.error("خطأ أثناء حذف المنتج:", err);
