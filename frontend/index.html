@@ -188,7 +188,7 @@
     // جلب المنتجات من الباك إند
     async function fetchProducts() {
       try {
-        const res = await fetch(`${API_BASE}/products`);
+        const res = await fetch(`${API_BASE}/products?t=${Date.now()}`);
         if (!res.ok) throw new Error("تعذر جلب المنتجات");
         allProducts = await res.json();
         renderProducts(allProducts);
