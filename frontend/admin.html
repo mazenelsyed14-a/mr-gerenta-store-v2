@@ -280,7 +280,7 @@
     // جلب المنتجات للوحة الإدارة
     async function fetchAdminProducts() {
       try {
-        const res = await fetch(`${API_BASE}/products`);
+        const res = await fetch(`${API_BASE}/products?fresh=1&t=${Date.now()}`);
         productsList = await res.json();
         renderAdminProducts(productsList);
         updateStats(productsList);
@@ -363,7 +363,7 @@
     }
 
     // ضغط وتصغير الصورة تلقائياً لتناسب شبكات الموبايل وسرعة الرفع
-    function compressImage(file, maxWidth = 1000, quality = 0.82) {
+    function compressImage(file, maxWidth = 800, quality = 0.78) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = (e) => {
