@@ -206,10 +206,11 @@ const upload = multer({
 
 // ======================= المسارات (API Routes) ======================= //
 
-// 1) فحص حالة تسجيل الدخول الحالية
+// 1) فحص حالة تسجيل الدخول الحالية (يدعم الجلسات والتوكن السحابي)
 app.get("/check-auth", (req, res) => {
-  if (req.session && req.session.owner) {
-    return res.json({ authenticated: true, user: "admin" });
+  const token = req.headers["x-admin-token"] || req.query.admin_token;
+  if ((req.session && req.session.owner) || (token && token === ADMIN_CONFIG.sessionSecret)) {
+    return res.json({ authenticated: true, user: "admin", token: ADMIN_CONFIG.sessionSecret });
   }
   return res.json({ authenticated: false });
 });
@@ -223,7 +224,8 @@ app.post("/login", (req, res) => {
     req.session.owner = true;
     return res.json({
       success: true,
-      message: "تم تسجيل الدخول بنجاح"
+      message: "تم تسجيل الدخول بنجاح",
+      token: ADMIN_CONFIG.sessionSecret
     });
   }
 
