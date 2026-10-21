@@ -208,9 +208,14 @@
     // التحقق من حالة تسجيل الدخول
     async function checkAuthStatus() {
       try {
-        const res = await fetch(`${API_BASE}/check-auth`, { credentials: "include" });
+        const token = localStorage.getItem("admin_token") || "";
+        const res = await fetch(`${API_BASE}/check-auth`, {
+          headers: { "x-admin-token": token },
+          credentials: "include"
+        });
         const data = await res.json();
         if (data.authenticated) {
+          if (data.token) localStorage.setItem("admin_token", data.token);
           showDashboard();
         } else {
           showLogin();
@@ -253,6 +258,7 @@
 
         const data = await res.json();
         if (res.ok && data.success) {
+          if (data.token) localStorage.setItem("admin_token", data.token);
           showToast("تم تسجيل الدخول بنجاح! أهلاً بك يا مالك المتجر.", "success");
           showDashboard();
         } else {
@@ -271,7 +277,13 @@
     // تسجيل الخروج
     async function handleLogout() {
       try {
-        await fetch(`${API_BASE}/logout`, { method: "POST", credentials: "include" });
+        const token = localStorage.getItem("admin_token") || "";
+        await fetch(`${API_BASE}/logout`, {
+          method: "POST",
+          headers: { "x-admin-token": token },
+          credentials: "include"
+        });
+        localStorage.removeItem("admin_token");
         showToast("تم تسجيل الخروج بنجاح.");
       } catch (e) {}
       showLogin();
@@ -430,14 +442,28 @@
           imageUrl: finalImage
         };
 
+        const token = localStorage.getItem("admin_token") || "";
         const res = await fetch(`${API_BASE}/add`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "x-admin-token": token
+          },
           body: JSON.stringify(payload),
           credentials: "include"
         });
 
-        const data = await res.json();
+        let data = {};
+        try {
+          data = await res.json();
+        } catch (e) {
+          if (res.status === 413) {
+            data = { success: false, message: "حجم الصورة كبير جداً على السيرفر، يرجى اختيار صورة أصغر" };
+          } else {
+            data = { success: false, message: `خطأ من الخادم (${res.status})` };
+          }
+        }
+
         if (res.ok && data.success) {
           showToast("تم نشر المنتج في المتجر بنجاح! 👑", "success");
           document.getElementById("uploadForm").reset();
@@ -462,12 +488,20 @@
       }
 
       try {
+        const token = localStorage.getItem("admin_token") || "";
         const res = await fetch(`${API_BASE}/products/${id}`, {
           method: "DELETE",
+          headers: { "x-admin-token": token },
           credentials: "include"
         });
 
-        const data = await res.json();
+        let data = {};
+        try {
+          data = await res.json();
+        } catch (e) {
+          data = { success: false, message: `استجابة غير متوقعة (${res.status})` };
+        }
+
         if (res.ok && data.success) {
           showToast("تم حذف المنتج بنجاح", "success");
           fetchAdminProducts();
