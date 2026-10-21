@@ -12,9 +12,10 @@ function verifyCredentials(user, pass) {
   return user === ADMIN_CONFIG.username && pass === ADMIN_CONFIG.password;
 }
 
-// ميدلوير لحماية المسارات الخاصة بالمالك فقط
+// ميدلوير لحماية المسارات الخاصة بالمالك فقط (يدعم الجلسات والتوكن السحابي)
 function onlyOwner(req, res, next) {
-  if (req.session && req.session.owner) {
+  const token = req.headers["x-admin-token"] || req.query.admin_token;
+  if ((req.session && req.session.owner) || (token && token === ADMIN_CONFIG.sessionSecret)) {
     return next();
   }
   return res.status(401).json({
